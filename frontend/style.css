@@ -266,9 +266,98 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
 
+/* ---- Кнопка-переключатель промпта (скрыта на десктопе) ---- */
+.btn-toggle {
+  display: none;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  gap: 6px;
+  align-items: center;
+}
+.btn-toggle:hover { background: var(--border); }
+
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---- Backdrop (мобильный оверлей) ---- */
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 90;
+  backdrop-filter: blur(2px);
+}
+.backdrop.visible { display: block; }
+
 /* ---- Responsive ---- */
 @media (max-width: 680px) {
-  .sidebar { width: 100%; max-width: none; height: 40vh; border-right: none; border-bottom: 1px solid var(--border); resize: vertical; }
+  /* Фикс iOS: предотвращаем зум при фокусе на инпут */
+  input, textarea, select { font-size: 16px !important; }
+
+  /* Показываем кнопку промпта */
+  .btn-toggle { display: flex; }
+
+  /* Сайдбар — выезжает сверху как шторка */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    width: 100%;
+    max-width: none;
+    max-height: 70vh;
+    z-index: 100;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0 0 16px 16px;
+    resize: none;
+    overflow-y: auto;
+    transform: translateY(-110%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  }
+  .sidebar.open {
+    transform: translateY(0);
+  }
+
+  /* Чат занимает весь экран */
   .layout { flex-direction: column; }
-  .message { max-width: 92%; }
+  .chat { flex: 1; height: 100vh; }
+
+  /* Сообщения шире */
+  .message { max-width: 88%; }
+
+  /* Шапка чата */
+  .chat-header { padding: 10px 14px; }
+  .chat-title { font-size: 14px; }
+
+  /* Кнопки — минимум 44px для удобного тапа */
+  .btn { min-height: 44px; }
+  .btn-ghost { font-size: 12px; padding: 6px 10px; min-height: 36px; }
+
+  /* Поле ввода */
+  .input-area {
+    padding: 10px 12px;
+    /* Отступ снизу для iPhone с Home Indicator */
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  .user-input { padding: 10px 12px; }
+
+  /* Кнопка отправки — квадратная */
+  .btn-primary { padding: 12px; min-height: 44px; min-width: 44px; }
+
+  /* Промпт-статус убираем — места мало */
+  .prompt-status { display: none; }
+
+  /* Сайдбар внутри — компактнее */
+  .sidebar { padding: 14px; gap: 10px; }
+  .prompt-textarea { min-height: 120px; font-size: 14px; }
+  .sidebar-footer { flex-wrap: wrap; gap: 8px; }
+  .btn-accent { flex: 1; min-height: 44px; }
 }

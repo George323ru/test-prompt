@@ -2,11 +2,12 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>GigaChat Prompt Tester</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="backdrop" id="backdrop"></div>
   <div class="layout">
 
     <!-- Боковая панель системного промпта -->
@@ -37,7 +38,15 @@
     <!-- Основная область чата -->
     <main class="chat">
       <header class="chat-header">
-        <h1 class="chat-title">GigaChat <span>Prompt Tester</span></h1>
+        <div class="chat-header-left">
+          <button id="promptToggle" class="btn btn-toggle" aria-label="Системный промпт">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            Промпт
+          </button>
+          <h1 class="chat-title">GigaChat <span>Tester</span></h1>
+        </div>
         <button id="clearBtn" class="btn btn-ghost">Очистить чат</button>
       </header>
 
@@ -51,7 +60,7 @@
         <textarea
           id="userInput"
           class="user-input"
-          placeholder="Введите сообщение... (Enter — отправить, Shift+Enter — новая строка)"
+          placeholder="Сообщение..."
           rows="1"
         ></textarea>
         <button id="sendBtn" class="btn btn-primary">

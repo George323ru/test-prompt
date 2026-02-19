@@ -11,8 +11,29 @@ const clearBtn       = $('clearBtn');
 const clearOnApply   = $('clearOnApply');
 const promptStatus   = $('promptStatus');
 const promptBadge    = $('promptBadge');
+const promptToggle   = $('promptToggle');
+const backdrop       = $('backdrop');
+const sidebar        = document.querySelector('.sidebar');
 
 let isSending = false;
+
+// ---- Мобильный сайдбар ----
+function openSidebar() {
+  sidebar.classList.add('open');
+  backdrop.classList.add('visible');
+}
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('visible');
+}
+function isMobile() {
+  return window.innerWidth <= 680;
+}
+
+promptToggle.addEventListener('click', () => {
+  sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+});
+backdrop.addEventListener('click', closeSidebar);
 
 // ---- Инициализация ----
 async function init() {
@@ -146,6 +167,7 @@ async function applyPrompt() {
     const data = await res.json();
     if (doClear) renderHistory(data.history);
     showStatus('Промпт применён', false);
+    if (isMobile()) closeSidebar();
   } catch (e) {
     showStatus(`Ошибка: ${e.message}`, true);
   } finally {

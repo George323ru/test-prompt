@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GigaChat Prompt Tester</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Боковая панель системного промпта -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="label">Системный промпт</span>
+        <span class="badge" id="promptBadge">активен</span>
+      </div>
+
+      <textarea
+        id="systemPrompt"
+        class="prompt-textarea"
+        placeholder="Введите системный промпт..."
+        spellcheck="false"
+      ></textarea>
+
+      <div class="sidebar-footer">
+        <label class="checkbox-label">
+          <input type="checkbox" id="clearOnApply" />
+          Очистить историю
+        </label>
+        <button id="applyBtn" class="btn btn-accent">Применить</button>
+      </div>
+
+      <div id="promptStatus" class="prompt-status"></div>
+    </aside>
+
+    <!-- Основная область чата -->
+    <main class="chat">
+      <header class="chat-header">
+        <h1 class="chat-title">GigaChat <span>Prompt Tester</span></h1>
+        <button id="clearBtn" class="btn btn-ghost">Очистить чат</button>
+      </header>
+
+      <div class="messages" id="messages">
+        <div class="empty-state">
+          Задайте системный промпт и начните диалог
+        </div>
+      </div>
+
+      <div class="input-area">
+        <textarea
+          id="userInput"
+          class="user-input"
+          placeholder="Введите сообщение... (Enter — отправить, Shift+Enter — новая строка)"
+          rows="1"
+        ></textarea>
+        <button id="sendBtn" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </main>
+
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

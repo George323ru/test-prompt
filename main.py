@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,7 +7,7 @@ import uuid
 import urllib3
 import os
 import time
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -26,10 +26,18 @@ CHAT_URL = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
 MODEL = "GigaChat-2-Max"
 
 # Состояние приложения (в памяти)
-system_prompt: str = "Ты полезный ассистент."
-history: List[dict] = []
+sessions: Dict[str, Any] = {}  # session_id -> {"system_prompt": str, "history": list}
 access_token: Optional[str] = None
 token_expires_at: float = 0
+
+
+def get_session(session_id: str) -> dict:
+    if session_id not in sessions:
+        sessions[session_id] = {
+            "system_prompt": "Ты полезный ассистент.",
+            "history": [],
+        }
+    return sessions[session_id]
 
 http_session = requests.Session()
 http_session.verify = False
@@ -73,22 +81,22 @@ class SystemPromptRequest(BaseModel):
 # --- API эндпоинты ---
 
 @app.get("/api/state")
-async def get_state():
+async def get_state(session_id: str = Query(...)):
     """Отдаёт текущий системный промпт и историю чата."""
-    return {"system_prompt": system_prompt, "history": history}
+    s = get_session(session_id)
+    return {"system_prompt": s["system_prompt"], "history": s["history"]}
 
 
 @app.post("/api/chat")
-async def chat(body: ChatRequest):
-    global history
-
-    history.append({"role": "user", "content": body.message})
+async def chat(body: ChatRequest, session_id: str = Query(...)):
+    s = get_session(session_id)
+    s["history"].append({"role": "user", "content": body.message})
 
     # Собираем сообщения: сначала system, потом вся история
     messages = []
-    if system_prompt:
-        messages.append({"role": "system", "content": system_prompt})
-    messages.extend(history)
+    if s["system_prompt"]:
+        messages.append({"role": "system", "content": s["system_prompt"]})
+    messages.extend(s["history"])
 
     try:
         token = get_access_token()
@@ -102,28 +110,28 @@ async def chat(body: ChatRequest):
         )
         response.raise_for_status()
         answer = response.json()["choices"][0]["message"]["content"]
-        history.append({"role": "assistant", "content": answer})
+        s["history"].append({"role": "assistant", "content": answer})
         return {"answer": answer}
     except Exception as e:
         # Откатываем сообщение пользователя если запрос не удался
-        history.pop()
+        s["history"].pop()
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.put("/api/system-prompt")
-async def set_system_prompt(body: SystemPromptRequest):
-    global system_prompt, history
-    system_prompt = body.prompt
+async def set_system_prompt(body: SystemPromptRequest, session_id: str = Query(...)):
+    s = get_session(session_id)
+    s["system_prompt"] = body.prompt
     if body.clear_history:
-        history = []
-    return {"system_prompt": system_prompt, "history": history}
+        s["history"] = []
+    return {"system_prompt": s["system_prompt"], "history": s["history"]}
 
 
 @app.delete("/api/history")
-async def clear_history_endpoint():
-    global history
-    history = []
-    return {"history": history}
+async def clear_history_endpoint(session_id: str = Query(...)):
+    s = get_session(session_id)
+    s["history"] = []
+    return {"history": s["history"]}
 
 
 # Статические файлы — монтируем последними

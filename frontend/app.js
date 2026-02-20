@@ -1,5 +1,17 @@
 const API = '';  // пустой = тот же хост
 
+// ---- Сессия ----
+function getSessionId() {
+  let id = localStorage.getItem('session_id');
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+    localStorage.setItem('session_id', id);
+  }
+  return id;
+}
+const SESSION_ID = getSessionId();
+function qs() { return `?session_id=${SESSION_ID}`; }
+
 const $ = id => document.getElementById(id);
 
 const systemPromptEl = $('systemPrompt');
@@ -38,7 +50,7 @@ backdrop.addEventListener('click', closeSidebar);
 // ---- Инициализация ----
 async function init() {
   try {
-    const res = await fetch(`${API}/api/state`);
+    const res = await fetch(`${API}/api/state${qs()}`);
     const data = await res.json();
     systemPromptEl.value = data.system_prompt;
     renderHistory(data.history);
@@ -125,7 +137,7 @@ async function sendMessage() {
   showTyping();
 
   try {
-    const res = await fetch(`${API}/api/chat`, {
+    const res = await fetch(`${API}/api/chat${qs()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text }),
@@ -156,7 +168,7 @@ async function applyPrompt() {
 
   applyBtn.disabled = true;
   try {
-    const res = await fetch(`${API}/api/system-prompt`, {
+    const res = await fetch(`${API}/api/system-prompt${qs()}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, clear_history: doClear }),
@@ -178,7 +190,7 @@ async function applyPrompt() {
 // ---- Очистить историю ----
 async function clearHistory() {
   try {
-    await fetch(`${API}/api/history`, { method: 'DELETE' });
+    await fetch(`${API}/api/history${qs()}`, { method: 'DELETE' });
     renderHistory([]);
   } catch (e) {
     showStatus(`Ошибка: ${e.message}`, true);

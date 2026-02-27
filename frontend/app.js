@@ -12,6 +12,19 @@ function getSessionId() {
 const SESSION_ID = getSessionId();
 function qs() { return `?session_id=${SESSION_ID}`; }
 
+// ---- Тема ----
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', next);
+  applyTheme(next);
+}
+applyTheme(localStorage.getItem('theme') || 'light');
+
 const $ = id => document.getElementById(id);
 
 const systemPromptEl = $('systemPrompt');
@@ -220,6 +233,7 @@ function autoResizeInput() {
 sendBtn.addEventListener('click', sendMessage);
 applyBtn.addEventListener('click', applyPrompt);
 clearBtn.addEventListener('click', clearHistory);
+$('themeToggle').addEventListener('click', toggleTheme);
 
 userInputEl.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {

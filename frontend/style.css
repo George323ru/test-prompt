@@ -2,18 +2,38 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  --bg:          #f5f6fa;
+  --surface:     #ffffff;
+  --surface2:    #eef0f5;
+  --border:      #d8dce6;
+  --accent:      #4f8ef7;
+  --accent-dim:  #2d5cad;
+  --danger:      #d93025;
+  --text:        #1a1d27;
+  --text-dim:    #6b7280;
+  --user-bubble: #dce8fc;
+  --bot-bubble:  #f0f1f5;
+  --badge-bg:    #e6f4e6;
+  --badge-color: #2e7d32;
+  --badge-border:#a5d6a7;
+  --ghost-hover: #fce8e8;
+  --radius:      10px;
+}
+
+[data-theme="dark"] {
   --bg:          #0f1117;
   --surface:     #1a1d27;
   --surface2:    #22263a;
   --border:      #2e3349;
-  --accent:      #4f8ef7;
-  --accent-dim:  #2d5cad;
   --danger:      #e05555;
   --text:        #e2e4ed;
   --text-dim:    #6b7280;
   --user-bubble: #1e3a5f;
   --bot-bubble:  #1e2235;
-  --radius:      10px;
+  --badge-bg:    #1a3a1a;
+  --badge-color: #4caf50;
+  --badge-border:#2a5a2a;
+  --ghost-hover: #3a1a1a;
 }
 
 html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
@@ -58,9 +78,9 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   font-size: 11px;
   padding: 2px 7px;
   border-radius: 99px;
-  background: #1a3a1a;
-  color: #4caf50;
-  border: 1px solid #2a5a2a;
+  background: var(--badge-bg);
+  color: var(--badge-color);
+  border: 1px solid var(--badge-border);
 }
 
 .prompt-textarea {
@@ -255,7 +275,20 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   font-size: 12px;
   padding: 6px 12px;
 }
-.btn-ghost:hover:not(:disabled) { background: #3a1a1a; }
+.btn-ghost:hover:not(:disabled) { background: var(--ghost-hover); }
+
+/* ---- Theme toggle ---- */
+.btn-theme {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+.btn-theme:hover { background: var(--border); }
 
 /* ---- Scrollbar ---- */
 ::-webkit-scrollbar { width: 5px; }

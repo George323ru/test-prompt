@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GigaChat Eval Runner</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="eval-page">
+        <header class="eval-header">
+            <h1>GigaChat Eval Runner</h1>
+            <div class="eval-header-actions">
+                <a href="/" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Chat</a>
+                <a href="/analyze" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Analyze</a>
+                <button class="btn btn-theme" id="themeBtn" title="Тема">
+                    <span id="themeIcon">&#9790;</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="eval-controls">
+            <div class="eval-prompt-section">
+                <label for="promptInput">Системный промпт</label>
+                <textarea id="promptInput" placeholder="Вставьте системный промпт сюда..." rows="8"></textarea>
+            </div>
+
+            <div class="eval-options">
+                <div class="eval-option-row">
+                    <label for="labelInput">Метка промпта</label>
+                    <input type="text" id="labelInput" value="v1" placeholder="original, new_v1, ...">
+                </div>
+                <div class="eval-option-row">
+                    <label class="eval-checkbox">
+                        <input type="checkbox" id="judgeCheck">
+                        <span>Оценка LLM-judge</span>
+                    </label>
+                </div>
+                <div class="eval-option-row">
+                    <span id="queryInfo" class="text-dim"></span>
+                </div>
+            </div>
+
+            <div class="eval-actions">
+                <button class="btn btn-primary" id="runBtn">Запустить прогон</button>
+                <button class="btn btn-ghost" id="downloadBtn" style="display:none">Скачать CSV</button>
+                <span id="statusText" class="text-dim"></span>
+            </div>
+
+            <div class="eval-progress" id="progressSection" style="display:none">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span id="progressText" class="text-dim"></span>
+            </div>
+        </div>
+
+        <div class="eval-results" id="resultsSection">
+            <table class="eval-table" id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Тип</th>
+                        <th>Запрос</th>
+                        <th>Ответ</th>
+                        <th>Балл</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/eval.js"></script>
+</body>
+</html>

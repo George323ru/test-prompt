@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GigaChat Analyze</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="eval-page">
+        <header class="eval-header">
+            <h1>Analyze Results</h1>
+            <div class="eval-header-actions">
+                <a href="/" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Chat</a>
+                <a href="/eval" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Eval</a>
+                <button class="btn btn-theme" id="themeBtn" title="Тема">
+                    <span id="themeIcon">&#9790;</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Upload zone -->
+        <div class="eval-controls" id="uploadSection">
+            <div class="eval-prompt-section">
+                <label>Загрузка CSV с ответами моделей</label>
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-text">
+                        Перетащите CSV-файл сюда или
+                        <button class="btn btn-accent" id="selectFileBtn" style="margin-left:8px">Выберите файл</button>
+                    </div>
+                    <input type="file" id="fileInput" accept=".csv" hidden>
+                    <div class="drop-zone-hint">Формат: query, GigaChat - Original, GigaChat - castom_max, GigaChat - castom_min, query_id, type, turn, ...</div>
+                </div>
+            </div>
+
+            <!-- Preview (hidden until upload) -->
+            <div id="previewSection" style="display:none">
+                <div class="eval-prompt-section">
+                    <label>Preview</label>
+                    <div id="previewStats" class="text-dim" style="margin-bottom:8px"></div>
+                    <div class="eval-results" style="max-height:240px;overflow:auto">
+                        <table class="eval-table" id="previewTable">
+                            <thead id="previewHead"></thead>
+                            <tbody id="previewBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="eval-actions">
+                <label class="eval-checkbox">
+                    <input type="checkbox" id="testModeCheck" checked>
+                    <span>Тестовый прогон</span>
+                </label>
+                <button class="btn btn-primary" id="runBtn" disabled>Запустить анализ</button>
+                <button class="btn btn-ghost" id="downloadBtn" style="display:none">Скачать CSV</button>
+                <span id="statusText" class="text-dim"></span>
+            </div>
+
+            <div class="eval-progress" id="progressSection" style="display:none">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span id="progressText" class="text-dim"></span>
+                <div id="statsPanel" class="stats-panel" style="display:none">
+                    <div class="stats-row">
+                        <span id="statCalls">API: 0</span>
+                        <span id="statTokens">Токены: 0</span>
+                        <span id="statElapsed">Время: 0с</span>
+                        <span id="statErrors"></span>
+                    </div>
+                    <div class="stats-log" id="statsLog"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="eval-results" id="resultsSection" style="display:none">
+            <table class="eval-table" id="resultsTable">
+                <thead id="resultsHead"></thead>
+                <tbody id="resultsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/analyze.js"></script>
+</body>
+</html>

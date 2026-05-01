@@ -4,15 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>GigaChat Eval Runner</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css?v=ux5">
 </head>
 <body>
     <div class="eval-page">
         <header class="eval-header">
-            <h1>GigaChat Eval Runner</h1>
+            <div>
+                <h1>Eval</h1>
+                <div class="page-subtitle">Автопрогон промпта по выбранной выборке</div>
+            </div>
             <div class="eval-header-actions">
-                <a href="/" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Chat</a>
-                <a href="/analyze" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Analyze</a>
+                <nav class="app-nav" aria-label="Основные разделы">
+                    <a href="/" class="nav-link">Chat</a>
+                    <a href="/eval" class="nav-link active" aria-current="page">Eval</a>
+                    <a href="/analyze" class="nav-link">Analyze</a>
+                </nav>
                 <button class="btn btn-theme" id="themeBtn" title="Тема">
                     <span id="themeIcon">&#9790;</span>
                 </button>
@@ -20,57 +26,102 @@
         </header>
 
         <div class="eval-controls">
-            <div class="eval-prompt-section">
-                <label for="promptInput">Системный промпт</label>
-                <textarea id="promptInput" placeholder="Вставьте системный промпт сюда..." rows="8"></textarea>
+            <div class="control-grid">
+                <section class="control-block control-block-main">
+                    <div class="block-heading">
+                        <span class="step-kicker">Промпт</span>
+                        <label for="promptInput">Системный промпт</label>
+                    </div>
+                    <textarea id="promptInput" placeholder="Вставьте системный промпт сюда..." rows="7"></textarea>
+                </section>
+
+                <section class="control-block">
+                    <div class="block-heading">
+                        <span class="step-kicker">Выборка</span>
+                        <label for="datasetSelect">Набор запросов</label>
+                    </div>
+                    <select id="datasetSelect">
+                        <option value="standard">Стандартная (single + multi-turn)</option>
+                        <option value="thinking">Задачи на мышление</option>
+                        <option value="v2">Тест v2 (полнота, safety, эмпатия)</option>
+                        <option value="test50">Тест 50 запросов (домены)</option>
+                    </select>
+                    <div id="queryInfo" class="text-dim dataset-count"></div>
+                </section>
             </div>
 
-            <div class="eval-options">
-                <div class="eval-option-row">
-                    <label for="labelInput">Метка промпта</label>
-                    <input type="text" id="labelInput" value="v1" placeholder="original, new_v1, ...">
+            <details id="advancedOptions" class="advanced-options">
+                <summary>Настройки</summary>
+                <div class="eval-options">
+                    <div class="preset-row" aria-label="Быстрые режимы">
+                        <button type="button" class="preset-btn active" data-preset="quick">Быстрый</button>
+                        <button type="button" class="preset-btn" data-preset="full">Полный</button>
+                        <button type="button" class="preset-btn" data-preset="judge">Judge</button>
+                    </div>
+                    <div class="eval-option-row">
+                        <label for="labelInput">Метка промпта</label>
+                        <input type="text" id="labelInput" value="v1" placeholder="original, new_v1, ...">
+                    </div>
+                    <div class="eval-option-row" id="singleOnlyRow">
+                        <label class="eval-checkbox">
+                            <input type="checkbox" id="singleOnlyCheck">
+                            <span>Только single-turn</span>
+                        </label>
+                    </div>
+                    <div class="eval-option-row">
+                        <label class="eval-checkbox">
+                            <input type="checkbox" id="judgeCheck">
+                            <span>Оценка LLM-judge</span>
+                        </label>
+                    </div>
                 </div>
-                <div class="eval-option-row">
-                    <label class="eval-checkbox">
-                        <input type="checkbox" id="judgeCheck">
-                        <span>Оценка LLM-judge</span>
-                    </label>
-                </div>
-                <div class="eval-option-row">
-                    <span id="queryInfo" class="text-dim"></span>
-                </div>
-            </div>
+            </details>
 
-            <div class="eval-actions">
+            <div class="run-panel">
+                <div>
+                    <span class="step-kicker">Запуск</span>
+                    <div id="runSummary" class="run-summary">Выберите выборку и вставьте промпт</div>
+                    <span id="statusText" class="text-dim"></span>
+                </div>
                 <button class="btn btn-primary" id="runBtn">Запустить прогон</button>
                 <button class="btn btn-ghost" id="downloadBtn" style="display:none">Скачать CSV</button>
-                <span id="statusText" class="text-dim"></span>
             </div>
 
-            <div class="eval-progress" id="progressSection" style="display:none">
+            <div class="run-banner" id="runBanner" hidden>
+                <div class="run-banner-main">
+                    <strong id="runBannerTitle">Запуск</strong>
+                    <span id="progressText" class="text-dim"></span>
+                </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <span id="progressText" class="text-dim"></span>
             </div>
         </div>
 
-        <div class="eval-results" id="resultsSection">
-            <table class="eval-table" id="resultsTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Тип</th>
-                        <th>Запрос</th>
-                        <th>Ответ</th>
-                        <th>Балл</th>
-                    </tr>
-                </thead>
-                <tbody id="resultsBody"></tbody>
-            </table>
+        <div class="results-layout">
+            <div class="eval-results" id="resultsSection">
+                <table class="eval-table" id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Тип</th>
+                            <th>Запрос</th>
+                            <th>Ответ</th>
+                            <th>Балл</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+                <div class="table-card-list" id="resultsCards"></div>
+            </div>
+
+            <aside class="details-panel" id="detailsPanel" aria-live="polite">
+                <div class="details-empty">Выберите строку результата, чтобы увидеть полный запрос, ответ и оценку.</div>
+            </aside>
         </div>
     </div>
 
-    <script src="/eval.js"></script>
+    <script src="/eval.js?v=ux5"></script>
 </body>
 </html>

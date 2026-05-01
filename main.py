@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Query, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import requests
 import uuid
 import urllib3
@@ -94,6 +94,10 @@ class SystemPromptRequest(BaseModel):
     clear_history: bool = False
 
 
+class HistoryRestoreRequest(BaseModel):
+    history: List[Dict[str, str]] = Field(default_factory=list)
+
+
 # --- API эндпоинты ---
 
 @app.get("/api/state")
@@ -147,6 +151,21 @@ async def set_system_prompt(body: SystemPromptRequest, session_id: str = Query(.
 async def clear_history_endpoint(session_id: str = Query(...)):
     s = get_session(session_id)
     s["history"] = []
+    return {"history": s["history"]}
+
+
+@app.put("/api/history")
+async def restore_history_endpoint(body: HistoryRestoreRequest, session_id: str = Query(...)):
+    restored = []
+    for item in body.history:
+        role = item.get("role")
+        content = item.get("content")
+        if role not in {"user", "assistant"} or not isinstance(content, str):
+            raise HTTPException(status_code=400, detail="Некорректный формат истории")
+        restored.append({"role": role, "content": content})
+
+    s = get_session(session_id)
+    s["history"] = restored
     return {"history": s["history"]}
 
 

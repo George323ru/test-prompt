@@ -4,15 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>GigaChat Analyze</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css?v=ux5">
 </head>
 <body>
     <div class="eval-page">
         <header class="eval-header">
-            <h1>Analyze Results</h1>
+            <div>
+                <h1>Analyze</h1>
+                <div class="page-subtitle">Сравнение ответов моделей через LLM-судью</div>
+            </div>
             <div class="eval-header-actions">
-                <a href="/" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Chat</a>
-                <a href="/eval" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Eval</a>
+                <nav class="app-nav" aria-label="Основные разделы">
+                    <a href="/" class="nav-link">Chat</a>
+                    <a href="/eval" class="nav-link">Eval</a>
+                    <a href="/analyze" class="nav-link active" aria-current="page">Analyze</a>
+                </nav>
                 <button class="btn btn-theme" id="themeBtn" title="Тема">
                     <span id="themeIcon">&#9790;</span>
                 </button>
@@ -22,14 +28,23 @@
         <!-- Upload zone -->
         <div class="eval-controls" id="uploadSection">
             <div class="eval-prompt-section">
-                <label>Загрузка CSV с ответами моделей</label>
+                <div class="block-heading">
+                    <span class="step-kicker">Загрузка</span>
+                    <label>CSV с ответами моделей</label>
+                </div>
                 <div class="drop-zone" id="dropZone">
                     <div class="drop-zone-text">
                         Перетащите CSV-файл сюда или
                         <button class="btn btn-accent" id="selectFileBtn" style="margin-left:8px">Выберите файл</button>
                     </div>
                     <input type="file" id="fileInput" accept=".csv" hidden>
-                    <div class="drop-zone-hint">Формат: query, GigaChat - Original, GigaChat - castom_max, GigaChat - castom_min, query_id, type, turn, ...</div>
+                    <div class="drop-zone-hint">
+                        Нужно: query_id, query, GigaChat - Original, GigaChat - castom_max, GigaChat - castom_min.
+                    </div>
+                </div>
+                <div class="upload-tools">
+                    <button class="btn btn-ghost" id="csvTemplateBtn">Скачать шаблон CSV</button>
+                    <div id="uploadValidation" class="validation-list">Файл еще не выбран.</div>
                 </div>
             </div>
 
@@ -47,21 +62,28 @@
                 </div>
             </div>
 
-            <div class="eval-actions">
-                <label class="eval-checkbox">
-                    <input type="checkbox" id="testModeCheck" checked>
-                    <span>Тестовый прогон</span>
-                </label>
+            <div class="run-panel">
+                <div>
+                    <span class="step-kicker">Запуск</span>
+                    <label class="eval-checkbox">
+                        <input type="checkbox" id="testModeCheck" checked>
+                        <span>Тестовый прогон</span>
+                    </label>
+                    <div id="runSummary" class="run-summary">Загрузите CSV, затем запустите анализ.</div>
+                    <span id="statusText" class="text-dim"></span>
+                </div>
                 <button class="btn btn-primary" id="runBtn" disabled>Запустить анализ</button>
                 <button class="btn btn-ghost" id="downloadBtn" style="display:none">Скачать CSV</button>
-                <span id="statusText" class="text-dim"></span>
             </div>
 
-            <div class="eval-progress" id="progressSection" style="display:none">
+            <div class="run-banner" id="runBanner" hidden>
+                <div class="run-banner-main">
+                    <strong id="runBannerTitle">Анализ</strong>
+                    <span id="progressText" class="text-dim"></span>
+                </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <span id="progressText" class="text-dim"></span>
                 <div id="statsPanel" class="stats-panel" style="display:none">
                     <div class="stats-row">
                         <span id="statCalls">API: 0</span>
@@ -75,14 +97,21 @@
         </div>
 
         <!-- Results -->
-        <div class="eval-results" id="resultsSection" style="display:none">
-            <table class="eval-table" id="resultsTable">
-                <thead id="resultsHead"></thead>
-                <tbody id="resultsBody"></tbody>
-            </table>
+        <div class="results-layout" id="resultsLayout" style="display:none">
+            <div class="eval-results" id="resultsSection">
+                <table class="eval-table" id="resultsTable">
+                    <thead id="resultsHead"></thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+                <div class="table-card-list" id="resultsCards"></div>
+            </div>
+
+            <aside class="details-panel" id="detailsPanel" aria-live="polite">
+                <div class="details-empty">Выберите строку результата, чтобы увидеть попарные сравнения и ответы моделей.</div>
+            </aside>
         </div>
     </div>
 
-    <script src="/analyze.js"></script>
+    <script src="/analyze.js?v=ux5"></script>
 </body>
 </html>

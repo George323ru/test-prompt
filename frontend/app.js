@@ -37,10 +37,15 @@ const clearOnApply   = $('clearOnApply');
 const promptStatus   = $('promptStatus');
 const promptBadge    = $('promptBadge');
 const promptToggle   = $('promptToggle');
+const promptCollapseBtn = $('promptCollapseBtn');
+const promptPreview  = $('promptPreview');
+const chatToast      = $('chatToast');
 const backdrop       = $('backdrop');
 const sidebar        = document.querySelector('.sidebar');
 
 let isSending = false;
+let lastClearedHistory = null;
+let toastTimer = null;
 
 // ---- Мобильный сайдбар ----
 function openSidebar() {
@@ -55,10 +60,32 @@ function isMobile() {
   return window.innerWidth <= 680;
 }
 
+function applySidebarState(collapsed) {
+  sidebar.classList.toggle('collapsed', collapsed && !isMobile());
+  if (promptCollapseBtn) {
+    promptCollapseBtn.setAttribute('aria-label', collapsed ? 'Развернуть промпт' : 'Свернуть промпт');
+    promptCollapseBtn.setAttribute('title', collapsed ? 'Развернуть промпт' : 'Свернуть промпт');
+    promptCollapseBtn.querySelector('span').textContent = collapsed ? '›' : '‹';
+  }
+}
+
+function updatePromptPreview() {
+  if (!promptPreview) return;
+  const text = systemPromptEl.value.trim();
+  promptPreview.textContent = text ? `${text.slice(0, 72)}${text.length > 72 ? '...' : ''}` : 'Промпт пуст';
+}
+
 promptToggle.addEventListener('click', () => {
   sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
 });
 backdrop.addEventListener('click', closeSidebar);
+if (promptCollapseBtn) {
+  promptCollapseBtn.addEventListener('click', () => {
+    const next = !sidebar.classList.contains('collapsed');
+    localStorage.setItem('prompt_sidebar_collapsed', next ? '1' : '0');
+    applySidebarState(next);
+  });
+}
 
 // ---- Инициализация ----
 async function init() {
@@ -66,6 +93,7 @@ async function init() {
     const res = await fetch(`${API}/api/state${qs()}`);
     const data = await res.json();
     systemPromptEl.value = data.system_prompt;
+    updatePromptPreview();
     renderHistory(data.history);
   } catch (e) {
     showStatus('Не удалось загрузить состояние', true);
@@ -191,6 +219,7 @@ async function applyPrompt() {
 
     const data = await res.json();
     if (doClear) renderHistory(data.history);
+    updatePromptPreview();
     showStatus('Промпт применён', false);
     if (isMobile()) closeSidebar();
   } catch (e) {
@@ -203,8 +232,14 @@ async function applyPrompt() {
 // ---- Очистить историю ----
 async function clearHistory() {
   try {
+    const currentHistory = [...messagesEl.querySelectorAll('.message')].map(node => ({
+      role: node.classList.contains('user') ? 'user' : 'assistant',
+      content: node.querySelector('.message-bubble')?.textContent || '',
+    })).filter(msg => msg.content);
     await fetch(`${API}/api/history${qs()}`, { method: 'DELETE' });
+    lastClearedHistory = currentHistory.length ? currentHistory : null;
     renderHistory([]);
+    showToast(lastClearedHistory ? 'История очищена' : 'История уже пустая', lastClearedHistory ? 'Отменить' : '');
   } catch (e) {
     showStatus(`Ошибка: ${e.message}`, true);
   }
@@ -222,6 +257,37 @@ function showStatus(msg, isError) {
   promptStatus.style.color = isError ? '#e05555' : '#4caf50';
   clearTimeout(promptStatus._timer);
   promptStatus._timer = setTimeout(() => { promptStatus.textContent = ''; }, 3000);
+}
+
+function showToast(message, actionText) {
+  if (!chatToast) return;
+  clearTimeout(toastTimer);
+  chatToast.hidden = false;
+  chatToast.innerHTML = actionText
+    ? `${message} <button type="button" id="undoClearBtn">${actionText}</button>`
+    : message;
+  const undoBtn = $('undoClearBtn');
+  if (undoBtn) {
+    undoBtn.addEventListener('click', async () => {
+      if (lastClearedHistory) {
+        try {
+          const res = await fetch(`${API}/api/history${qs()}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ history: lastClearedHistory }),
+          });
+          if (!res.ok) throw new Error('Ошибка сервера');
+          const data = await res.json();
+          renderHistory(data.history);
+        } catch (e) {
+          showStatus(`Ошибка: ${e.message}`, true);
+        }
+      }
+      lastClearedHistory = null;
+      chatToast.hidden = true;
+    });
+  }
+  toastTimer = setTimeout(() => { chatToast.hidden = true; }, 7000);
 }
 
 function autoResizeInput() {
@@ -243,6 +309,7 @@ userInputEl.addEventListener('keydown', e => {
 });
 
 userInputEl.addEventListener('input', autoResizeInput);
+systemPromptEl.addEventListener('input', updatePromptPreview);
 
 // Ctrl+Enter тоже применяет промпт
 systemPromptEl.addEventListener('keydown', e => {
@@ -252,4 +319,11 @@ systemPromptEl.addEventListener('keydown', e => {
   }
 });
 
+function savedSidebarCollapsed() {
+  const saved = localStorage.getItem('prompt_sidebar_collapsed');
+  return saved === null ? true : saved === '1';
+}
+
 init();
+applySidebarState(savedSidebarCollapsed());
+window.addEventListener('resize', () => applySidebarState(savedSidebarCollapsed()));

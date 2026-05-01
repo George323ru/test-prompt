@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>GigaChat Prompt Tester</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=ux5" />
 </head>
 <body>
   <div class="backdrop" id="backdrop"></div>
@@ -13,8 +13,16 @@
     <!-- Боковая панель системного промпта -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <span class="label">Системный промпт</span>
-        <span class="badge" id="promptBadge">активен</span>
+        <div>
+          <span class="label">Системный промпт</span>
+          <div class="sidebar-caption" id="promptPreview">Редактируется для текущей сессии</div>
+        </div>
+        <div class="sidebar-header-actions">
+          <span class="badge" id="promptBadge">активен</span>
+          <button id="promptCollapseBtn" class="icon-btn" aria-label="Свернуть промпт" title="Свернуть промпт">
+            <span aria-hidden="true">‹</span>
+          </button>
+        </div>
       </div>
 
       <textarea
@@ -47,9 +55,12 @@
           </button>
           <h1 class="chat-title">GigaChat <span>Tester</span></h1>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <a href="/eval" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Eval</a>
-          <a href="/analyze" class="btn btn-ghost" style="color:var(--text);border-color:var(--border)">Analyze</a>
+        <div class="header-actions">
+          <nav class="app-nav" aria-label="Основные разделы">
+            <a href="/" class="nav-link active" aria-current="page">Chat</a>
+            <a href="/eval" class="nav-link">Eval</a>
+            <a href="/analyze" class="nav-link">Analyze</a>
+          </nav>
           <button id="themeToggle" class="btn btn-theme" aria-label="Переключить тему">🌙</button>
           <button id="clearBtn" class="btn btn-ghost">Очистить чат</button>
         </div>
@@ -62,6 +73,7 @@
       </div>
 
       <div class="input-area">
+        <div id="chatToast" class="toast" hidden></div>
         <textarea
           id="userInput"
           class="user-input"
@@ -78,6 +90,6 @@
     </main>
 
   </div>
-  <script src="app.js"></script>
+  <script src="app.js?v=ux5"></script>
 </body>
 </html>
